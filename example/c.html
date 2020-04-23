@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>crossWindowEmitter-once</title>
+</head>
+
+<body>
+  <h2>once - 只监听一次</h2>
+  <div id="result">暂无消息</div>
+  <br/><br/><br/>
+  <h3>代码</h3>
+  <pre>&lt;div id="result"&gt;暂无消息&lt;/div&gt;
+
+&lt;script src="../dist/cross-window-emitter.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  var resultEl = document.getElementById("result");
+
+  function onMessage(value) {
+    resultEl.innerHTML = "接受消息：" + value;
+  }
+  crossWindowEmitter.on('msg', onMessage);
+&lt;/script&gt;</pre>
+</body>
+<script src="../dist/cross-window-emitter.min.js"></script>
+<script>
+  var resultEl = document.getElementById("result");
+
+  function onMessage(value) {
+    resultEl.innerHTML = "接受消息：" + value;
+  }
+  crossWindowEmitter.once('msg', onMessage);
+</script>
+
+</html>
