@@ -15,7 +15,13 @@
     "type": "git",
     "url": "git+https://github.com/caijf/cross-window-emitter.git"
   },
-  "keywords": [],
+  "keywords": [
+    "cross",
+    "cross-webview",
+    "cross-iframe",
+    "cross-window",
+    "cross-window-emitter"
+  ],
   "author": "",
   "license": "MIT",
   "bugs": {
