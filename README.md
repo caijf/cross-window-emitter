@@ -4,6 +4,7 @@
 
 同域跨窗口事件触发器，通过轮询和 `localStorage` 实现。
 
+[点击查看示例](https://caijf.github.io/cross-window-emitter/example/index.html)
 
 ## 安装
 
@@ -26,7 +27,7 @@ yarn add cross-window-emitter
 
 ## 使用
 
-**window 1**
+**window 1 page**
 
 ```javascript
 import crossWindowEmitter from 'cross-window-emitter';
@@ -36,7 +37,7 @@ crossWindowEmitter.on("update", ()=>{
 });
 ```
 
-**window 2**
+**window 2 page**
 
 ```javascript
 import crossWindowEmitter from 'cross-window-emitter';
