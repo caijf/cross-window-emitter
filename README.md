@@ -49,8 +49,8 @@ crossWindowEmitter.emit("update");
 
 ### on(eventName, listener)
 
-> - eventName &lt;string> | &lt;symbol> 事件名称。
-> - listener &lt;Function> 回调函数。
+> - eventName &lt;string&gt; | &lt;symbol&gt; 事件名称。
+> - listener &lt;Function&gt; 回调函数。
 
 添加 `listener` 函数到名为 `eventName` 的事件的监听器数组的末尾。 不会检查 `listener` 是否已被添加。 多次调用并传入相同的 `eventName` 与 `listener` 会导致 `listener` 会被添加多次。
 
