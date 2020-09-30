@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Co-domain cross-window event triggers",
   "main": "lib/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run build:lib && rm -rf dist && npm run build:dist && npm run build:dist-development",
