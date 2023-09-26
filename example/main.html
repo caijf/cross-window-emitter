@@ -1,26 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crossWindowEmitter</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>crossWindowEmitter</title>
-</head>
-
-<body>
-  <h2>同域跨窗口事件触发器演示</h2>
-  <p>请在不同标签页打开以下页面：</p>
-  <ul>
-    <li><a href="./a.html" target="_blank">on - 监听</a></li>
-    <li><a href="./b.html" target="_blank">on - 监听，3秒轮询一次</a></li>
-    <li><a href="./c.html" target="_blank">once - 只监听一次</a></li>
-  </ul>
-  <p>输入消息之后，点击按钮发送，就可以看到其它标签页的结果。</p>
-  <input type="text" placeholder="请输入" id="msgInput" />
-  <button id="sendBtn">点击发送消息</button>
-  <br/><br/><br/>
-  <h3>代码</h3>
-  <pre>&lt;input type="text" placeholder="请输入" id="msgInput" /&gt;
+  <body>
+    <h2>同域跨窗口事件触发器演示</h2>
+    <p>请在不同标签页打开以下页面：</p>
+    <ul>
+      <li><a href="./a.html" target="_blank">on - 监听</a></li>
+      <li><a href="./b.html" target="_blank">on - 监听，3秒轮询一次</a></li>
+      <li><a href="./c.html" target="_blank">once - 只监听一次</a></li>
+    </ul>
+    <p>输入消息之后，点击按钮发送，就可以看到其它标签页的结果。</p>
+    <input type="text" placeholder="请输入" id="msgInput" />
+    <button id="sendBtn">点击发送消息</button>
+    <br /><br /><br />
+    <h3>代码</h3>
+    <pre>
+&lt;input type="text" placeholder="请输入" id="msgInput" /&gt;
 &lt;button id="sendBtn"&gt;点击发送消息&lt;/button&gt;
 
 &lt;script src="../dist/cross-window-emitter.min.js"&gt;&lt;/script&gt;
@@ -31,16 +31,16 @@
   sendBtnEl.onclick = function () {
     crossWindowEmitter.emit('msg', msgInputEl.value);
   }
-&lt;/script&gt;</pre>
-</body>
-<script src="../dist/cross-window-emitter.min.js"></script>
-<script>
-  var msgInputEl = document.getElementById("msgInput");
-  var sendBtnEl = document.getElementById("sendBtn");
+&lt;/script&gt;</pre
+    >
+  </body>
+  <script src="../dist/cross-window-emitter.min.js"></script>
+  <script>
+    var msgInputEl = document.getElementById('msgInput');
+    var sendBtnEl = document.getElementById('sendBtn');
 
-  sendBtnEl.onclick = function () {
-    crossWindowEmitter.emit('msg', msgInputEl.value);
-  }
-</script>
-
+    sendBtnEl.onclick = function () {
+      crossWindowEmitter.emit('msg', msgInputEl.value);
+    };
+  </script>
 </html>

@@ -7,7 +7,7 @@ const MAX_EMITTER_TIME = 30 * 60 * 1000;
 
 // 处理程序
 const handlers = {
-  data: {} as Record<string, { fn: Listener; timestamp: number; }[]>,
+  data: {} as Record<string, { fn: Listener; timestamp: number }[]>,
 
   // 添加处理程序
   add(eventName: string, listener: Listener) {
@@ -17,13 +17,13 @@ const handlers = {
     this.data[eventName].push({
       timestamp: Date.now(), // 注册或触发时间，如果该时间大于触发时间则不触发。
       fn: listener
-    })
+    });
   },
 
   // 删除处理程序
   remove(eventName: string, listener?: Listener) {
     if (this.data[eventName] && listener) {
-      this.data[eventName] = this.data[eventName].filter(item => item.fn !== listener);
+      this.data[eventName] = this.data[eventName].filter((item) => item.fn !== listener);
     } else {
       this.data[eventName] = [];
     }
@@ -42,10 +42,13 @@ const handlers = {
 };
 
 // 触发器缓存
-const emitterStorage = new Cache<{ timestamp: number; params: any[]; }>('__private_cross_window_emitter__', {
-  stdTTL: MAX_EMITTER_TIME,
-  storage: window.localStorage
-});
+const emitterStorage = new Cache<{ timestamp: number; params: any[] }>(
+  '__private_cross_window_emitter__',
+  {
+    stdTTL: MAX_EMITTER_TIME,
+    storage: window.localStorage
+  }
+);
 
 // 运行
 const run = (eventName: string, cb?: () => void) => {
@@ -60,14 +63,14 @@ const run = (eventName: string, cb?: () => void) => {
           curHandlers[index].timestamp = Date.now(); // 更新执行时间
           fn.apply(null, curEmitter.params);
         }
-      })
+      });
     }
-  }
-}
+  };
+};
 
 // 轮询管理
 const polling = {
-  data: {} as Record<string, { timestamp: number; pollingInterval: number; timer: any; }>,
+  data: {} as Record<string, { timestamp: number; pollingInterval: number; timer: any }>,
 
   // 开始轮询
   start(eventName: string, fn: () => void, pollingInterval = 500) {
@@ -80,7 +83,7 @@ const polling = {
         timestamp: Date.now(), // 开始轮询时间
         pollingInterval,
         timer: null
-      }
+      };
     }
 
     const curPolling = this.data[eventName];
@@ -113,22 +116,22 @@ const polling = {
     clearInterval(curPolling.timer);
     this.start(eventName, run(eventName), pollingInterval);
   }
-}
+};
 
 /**
  * 注册事件
- * 
+ *
  * @param {string} eventName 事件名称
  * @param {function} listener 回调函数
  */
 const on = (eventName: string, listener: Listener) => {
   handlers.add(eventName, listener);
   polling.start(eventName, run(eventName));
-}
+};
 
 /**
  * 注册一次事件，执行后移除该监听方法
- * 
+ *
  * @param {string} eventName 事件名称
  * @param {function} listener 回调函数
  */
@@ -148,11 +151,11 @@ const once = (eventName: string, listener: Listener) => {
       isRun = true;
     })();
   });
-}
+};
 
 /**
  * 解绑事件，如不传第二参数，将移除全部 eventName 的事件
- * 
+ *
  * @param {string} eventName 事件名称
  * @param {function} [listener] 回调函数
  */
@@ -162,11 +165,11 @@ const off = (eventName: string, listener?: Listener) => {
   if (!handlers.has(eventName)) {
     polling.stop(eventName);
   }
-}
+};
 
 /**
  * 触发事件
- * 
+ *
  * @param {string} eventName 事件名称
  * @param {any[]} ...args 剩余参数用于传参
  */
@@ -175,7 +178,7 @@ const emit = (eventName: string, ...args: any[]) => {
     timestamp: Date.now(), // 触发时间
     params: args || []
   });
-}
+};
 
 // // 销毁，全部取消轮询
 // const destroy = () => {
@@ -186,18 +189,12 @@ const emit = (eventName: string, ...args: any[]) => {
 
 /**
  * 设置轮询时间
- * 
+ *
  * @param {string} eventName 事件名称
  * @param {number} pollingInterval 轮询时间，单位毫秒
  */
 const setPollingInterval = (eventName: string, pollingInterval: number) => {
   polling.setPollingInterval(eventName, pollingInterval);
-}
+};
 
-export {
-  on,
-  once,
-  off,
-  emit,
-  setPollingInterval
-}
+export { on, once, off, emit, setPollingInterval };

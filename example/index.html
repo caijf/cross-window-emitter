@@ -1,49 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cross window emitter</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cross window emitter</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+      .container {
+        display: flex;
+      }
 
-    .container {
-      display: flex;
-    }
+      .left,
+      .right {
+        flex: 1;
+        width: 50vw;
+      }
 
-    .left,
-    .right {
-      flex: 1;
-      width: 50vw;
-    }
+      .right iframe {
+        height: 33.3333vh;
+      }
 
-    .right iframe {
-      height: 33.3333vh;
-    }
+      iframe {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
 
-    iframe {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <div class="left">
-      <iframe src="./main.html"></iframe>
+  <body>
+    <div class="container">
+      <div class="left">
+        <iframe src="./main.html"></iframe>
+      </div>
+      <div class="right">
+        <iframe src="./a.html"></iframe>
+        <iframe src="./b.html"></iframe>
+        <iframe src="./c.html"></iframe>
+      </div>
     </div>
-    <div class="right">
-      <iframe src="./a.html"></iframe>
-      <iframe src="./b.html"></iframe>
-      <iframe src="./c.html"></iframe>
-    </div>
-  </div>
-</body>
-
+  </body>
 </html>

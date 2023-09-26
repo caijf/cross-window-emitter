@@ -1,12 +1,8 @@
 import { defineConfig } from 'rollup';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
-
-import pkg from './package.json' assert { type: "json" };
-
-const globalName = 'crossWindowEmitter'
+import pkg from './package.json' assert { type: 'json' };
 
 export default defineConfig({
   input: 'src/index.ts',
@@ -22,4 +18,4 @@ export default defineConfig({
     }
   ],
   plugins: [resolve(), commonjs(), typescript()]
-})
+});

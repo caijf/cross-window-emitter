@@ -1,20 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crossWindowEmitter-on1</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>crossWindowEmitter-on1</title>
-</head>
-
-<body>
-  <h2>on - 监听</h2>
-  <div id="result">暂无消息</div>
-  <br />
-  <button id="stopBtn">停止监听</button>
-  <br/><br/><br/>
-  <h3>代码</h3>
-  <pre>&lt;div id="result"&gt;暂无消息&lt;/div&gt;
+  <body>
+    <h2>on - 监听</h2>
+    <div id="result">暂无消息</div>
+    <br />
+    <button id="stopBtn">停止监听</button>
+    <br /><br /><br />
+    <h3>代码</h3>
+    <pre>
+&lt;div id="result"&gt;暂无消息&lt;/div&gt;
 
 &lt;script src="../dist/cross-window-emitter.min.js"&gt;&lt;/script&gt;
 &lt;script&gt;
@@ -30,22 +30,22 @@
     crossWindowEmitter.off('msg');
     resultEl.innerHTML = "已停止监听";
   }
-&lt;/script&gt;</pre>
-</body>
-<script src="../dist/cross-window-emitter.min.js"></script>
-<script>
-  var resultEl = document.getElementById("result");
-  var stopBtnEl = document.getElementById("stopBtn");
+&lt;/script&gt;</pre
+    >
+  </body>
+  <script src="../dist/cross-window-emitter.min.js"></script>
+  <script>
+    var resultEl = document.getElementById('result');
+    var stopBtnEl = document.getElementById('stopBtn');
 
-  function onMessage(value, v2) {
-    resultEl.innerHTML = "接受消息：" + value;
-  }
-  crossWindowEmitter.on('msg', onMessage);
+    function onMessage(value, v2) {
+      resultEl.innerHTML = '接受消息：' + value;
+    }
+    crossWindowEmitter.on('msg', onMessage);
 
-  stopBtnEl.onclick = function () {
-    crossWindowEmitter.off('msg');
-    resultEl.innerHTML = "已停止监听";
-  }
-</script>
-
+    stopBtnEl.onclick = function () {
+      crossWindowEmitter.off('msg');
+      resultEl.innerHTML = '已停止监听';
+    };
+  </script>
 </html>
