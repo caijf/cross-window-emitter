@@ -1,363 +1,598 @@
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define("crossWindowEmitter", [], factory);
-	else if(typeof exports === 'object')
-		exports["crossWindowEmitter"] = factory();
-	else
-		root["crossWindowEmitter"] = factory();
-})(window, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/index.js");
-/******/ })
-/************************************************************************/
-/******/ ({
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.crossWindowEmitter = {}));
+})(this, (function (exports) { 'use strict';
 
-/***/ "./src/index.js":
-/*!**********************!*\
-  !*** ./src/index.js ***!
-  \**********************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
 
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
-  if (true) {
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-  } else { var mod; }
-})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : this, function (_exports) {
-  "use strict";
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
 
-  Object.defineProperty(_exports, "__esModule", {
-    value: true
-  });
-  _exports.setPollingInterval = _exports.once = _exports.on = _exports.off = _exports.emit = _exports["default"] = void 0;
-  function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-  function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-  function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-  function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-  function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-  function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
-  // 事件触发器缓存最长保留时间，轮询时间不能超过该时间一半
-  var MAX_EMITTER_TIME = 30 * 60 * 1000;
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+    /* global Reflect, Promise, SuppressedError, Symbol */
 
-  // 处理程序
-  var handlers = {
-    data: {},
-    // 添加处理程序
-    add: function add(eventName, listener) {
-      if (!this.data[eventName]) {
-        this.data[eventName] = [];
-      }
-      this.data[eventName].push({
-        timestamp: Date.now(),
-        // 注册或触发时间，如果该时间大于触发时间则不触发。
-        fn: listener
-      });
-    },
-    // 删除处理程序
-    remove: function remove(eventName, listener) {
-      if (this.data[eventName] && listener) {
-        this.data[eventName] = this.data[eventName].filter(function (item) {
-          return item.fn !== listener;
-        });
-      } else {
-        this.data[eventName] = [];
-      }
-    },
-    // 获取处理程序
-    get: function get(eventName) {
-      return eventName ? this.data[eventName] : this.data;
-    },
-    // 是否还有处理程序
-    has: function has(eventName) {
-      var eventList = this.get(eventName) || [];
-      return eventList.length > 0;
-    }
-  };
-
-  // 触发器缓存
-  var emitterStorage = {
-    // 缓存key
-    key: "__private_cross_window_emitter__",
-    // 获取缓存
-    get: function get(eventName) {
-      var tmpData = JSON.parse(window.localStorage.getItem(this.key)) || {};
-      return eventName ? tmpData[eventName] : tmpData;
-    },
-    // 设置缓存
-    set: function set(data) {
-      window.localStorage.setItem(this.key, JSON.stringify(data));
-    },
-    // 添加数据
-    add: function add(eventName) {
-      var tmpData = this.get();
-      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        args[_key - 1] = arguments[_key];
-      }
-      tmpData[eventName] = {
-        timestamp: Date.now(),
-        // 触发时间
-        params: args || []
-      };
-      var keys = Object.keys(tmpData);
-      keys.forEach(function (key) {
-        if (Date.now() - tmpData[key] > MAX_EMITTER_TIME) {
-          delete tmpData[key];
-        }
-      });
-      this.set(tmpData);
-    },
-    // 删除数据
-    remove: function remove(eventName) {
-      var tmpData = this.get();
-      if (eventName) {
-        delete tmpData[eventName];
-        this.set(tmpData);
-      } else {
-        window.localStorage.removeItem(this.key);
-      }
-    }
-  };
-
-  // 运行
-  var run = function run(eventName) {
-    var cb = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
-    return function () {
-      var curEmitter = emitterStorage.get(eventName);
-      var curHandlers = handlers.get(eventName);
-      if (curEmitter) {
-        curHandlers.forEach(function (_ref, index) {
-          var timestamp = _ref.timestamp,
-            fn = _ref.fn;
-          if (timestamp < curEmitter.timestamp) {
-            cb();
-            curHandlers[index].timestamp = Date.now(); // 更新执行时间
-            fn.call.apply(fn, [null].concat(_toConsumableArray(curEmitter.params)));
-          }
-        });
-      }
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
     };
-  };
 
-  // 轮询管理
-  var polling = {
-    data: {},
-    // 开始轮询
-    start: function start(eventName, fn) {
-      var pollingInterval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 500;
-      if (!eventName) {
-        return;
-      }
-      if (!this.data[eventName]) {
-        this.data[eventName] = {
-          timestamp: Date.now(),
-          // 开始轮询时间
-          pollingInterval: pollingInterval,
-          timer: null
+    function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
+
+    var __assign = function() {
+        __assign = Object.assign || function __assign(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+            }
+            return t;
         };
-      }
-      var curPolling = this.data[eventName];
-      curPolling.pollingInterval = pollingInterval;
-      clearInterval(curPolling.timer);
-      curPolling.timer = setInterval(fn, pollingInterval);
-    },
-    // 停止轮询
-    stop: function stop(eventName) {
-      if (!eventName || !this.data[eventName]) {
-        return;
-      }
-      clearInterval(this.data[eventName].timer);
-    },
-    // 设置轮询时间
-    setPollingInterval: function setPollingInterval(eventName) {
-      var pollingInterval = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 500;
-      if (!eventName || !this.data[eventName] || !pollingInterval) {
-        return;
-      }
-      if (pollingInterval > MAX_EMITTER_TIME / 2) {
-        console.warn("polling interval no more than ".concat(MAX_EMITTER_TIME, "."));
-        pollingInterval = MAX_EMITTER_TIME / 2;
-      }
-      var curPolling = this.data[eventName];
-      clearInterval(curPolling.timer);
-      this.start(eventName, run(eventName), pollingInterval);
-    }
-  };
+        return __assign.apply(this, arguments);
+    };
 
-  /**
-   * 注册事件
-   * 
-   * @param {string} eventName 事件名称
-   * @param {function} listener 回调函数
-   */
-  var on = _exports.on = function on(eventName, listener) {
-    handlers.add(eventName, listener);
-    polling.start(eventName, run(eventName));
-  };
+    typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+        var e = new Error(message);
+        return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+    };
 
-  /**
-   * 注册一次事件，执行后移除该监听方法
-   * 
-   * @param {string} eventName 事件名称
-   * @param {function} listener 回调函数
-   */
-  var once = _exports.once = function once(eventName, listener) {
-    var isRun = false; // 标识是否运行过函数
-    handlers.add(eventName, listener);
-    polling.start(eventName, function () {
-      if (isRun) {
-        handlers.remove(eventName, listener); // 移除该监听方法
-
-        if (!handlers.has(eventName)) {
-          polling.stop(eventName); // 如果没有处理程序，停止轮询
+    var EmitterPro = /** @class */ (function () {
+        function EmitterPro() {
+            this.handler = {};
         }
-      }
+        EmitterPro.prototype.eventNames = function () {
+            return Object.keys(this.handler);
+        };
+        EmitterPro.prototype.listeners = function (eventName) {
+            return this.handler[eventName] || [];
+        };
+        EmitterPro.prototype.hasListener = function (eventName, listener) {
+            return this.listeners(eventName).some(function (item) { return item === listener; });
+        };
+        EmitterPro.prototype.on = function (eventName, listener) {
+            if (!this.handler[eventName]) {
+                this.handler[eventName] = [listener];
+            }
+            else {
+                // 不允许添加相同的方法
+                if (!this.hasListener(eventName, listener)) {
+                    this.handler[eventName].push(listener);
+                }
+            }
+            return this;
+        };
+        EmitterPro.prototype.off = function (eventName, listener) {
+            if (this.handler[eventName]) {
+                if (typeof listener === 'function') {
+                    this.handler[eventName] = this.handler[eventName].filter(function (item) { return item !== listener; });
+                }
+                else {
+                    delete this.handler[eventName];
+                }
+            }
+            return this;
+        };
+        EmitterPro.prototype.emit = function (eventName) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            var listeners = this.listeners(eventName);
+            if (listeners.length > 0) {
+                listeners.forEach(function (listener) {
+                    // eslint-disable-next-line prefer-spread
+                    listener.apply(void 0, args);
+                });
+                return true;
+            }
+            return false;
+        };
+        EmitterPro.prototype.once = function (eventName, listener) {
+            var _this = this;
+            var wrap = function () {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                // eslint-disable-next-line prefer-spread
+                listener.apply(void 0, args);
+                _this.off(eventName, wrap);
+            };
+            return this.on(eventName, wrap);
+        };
+        EmitterPro.prototype.offAll = function () {
+            this.handler = {};
+            return this;
+        };
+        return EmitterPro;
+    }());
 
-      run(eventName, function () {
-        isRun = true;
-      })();
+    var cache = {};
+    var memoryStorage = {
+        getItem: function (key) {
+            return cache[key] || null;
+        },
+        setItem: function (key, value) {
+            cache[key] = value;
+        },
+        removeItem: function (key) {
+            delete cache[key];
+        }
+    };
+
+    // 随机字符串
+    function randomString() {
+        return Math.random().toString(16).substring(2, 8);
+    }
+    // 内部自增id
+    var uid = 1;
+    // 返回唯一标识
+    function uniqueId(id) {
+        if (id === void 0) { id = ''; }
+        var str = typeof id === 'string' && id ? id : "".concat(randomString(), "_").concat(uid++);
+        return 'cache2_' + str;
+    }
+    // 是否支持 storage
+    function isStorageSupported(storage) {
+        try {
+            var isSupport = typeof storage === 'object' &&
+                storage !== null &&
+                !!storage.setItem &&
+                !!storage.getItem &&
+                !!storage.removeItem;
+            if (isSupport) {
+                var key = uniqueId();
+                var value = '1';
+                storage.setItem(key, value);
+                if (storage.getItem(key) !== value) {
+                    return false;
+                }
+                storage.removeItem(key);
+            }
+            return isSupport;
+        }
+        catch (e) {
+            console.error('[cache2] The current custom storage is not supported. The default memory cache will be used.');
+            return false;
+        }
+    }
+    var Cache2 = /** @class */ (function (_super) {
+        __extends(Cache2, _super);
+        function Cache2(key, options) {
+            var _this = _super.call(this) || this;
+            var k, opts;
+            if (typeof key === 'string') {
+                k = key;
+            }
+            else if (typeof key === 'object') {
+                opts = key;
+            }
+            if (!opts && typeof options === 'object') {
+                opts = options;
+            }
+            _this.options = __assign({ max: -1, stdTTL: 0, storage: memoryStorage, maxStrategy: 'limited', checkperiod: 0, needParsed: typeof (opts === null || opts === void 0 ? void 0 : opts.needParsed) === 'boolean' ? opts.needParsed : !!(opts === null || opts === void 0 ? void 0 : opts.storage) }, opts);
+            // iOS Safari 开启隐身模式下使用 localStorage 可能报错
+            if (_this.options.storage !== memoryStorage && !isStorageSupported(_this.options.storage)) {
+                _this.options.storage = memoryStorage;
+                _this.options.needParsed = false;
+            }
+            _this.cacheKey = uniqueId(k);
+            _this.startCheckperiod();
+            return _this;
+        }
+        // 检查当前键值是否过期，如果过期将会自动删除
+        Cache2.prototype._check = function (key, data) {
+            var ret = true;
+            if (data.t !== 0 && data.t < Date.now()) {
+                ret = false;
+                this.del(key);
+                this.emit('expired', key, data.v);
+            }
+            return ret;
+        };
+        Cache2.prototype._wrap = function (value, ttl) {
+            var now = Date.now();
+            var currentTtl = typeof ttl === 'number' ? ttl : this.options.stdTTL;
+            var livetime = currentTtl > 0 ? now + currentTtl : 0;
+            return {
+                v: value,
+                t: livetime,
+                n: now
+            };
+        };
+        Cache2.prototype._isLimited = function (len) {
+            return this.options.max > -1 && len >= this.options.max;
+        };
+        Cache2.prototype._getReplaceKey = function (keys, cacheValues) {
+            var retkey = keys[0];
+            keys.forEach(function (key) {
+                if (cacheValues[key].t < cacheValues[retkey].t ||
+                    (cacheValues[key].t === cacheValues[retkey].t && cacheValues[key].n < cacheValues[retkey].n)) {
+                    retkey = key;
+                }
+            });
+            return retkey;
+        };
+        Cache2.prototype._parse = function (value) {
+            // 缓存在内存不需要转换
+            if (!this.options.needParsed) {
+                return value;
+            }
+            try {
+                return JSON.parse(value, this.options.reviver);
+            }
+            catch (e) {
+                return value;
+            }
+        };
+        Cache2.prototype._stringify = function (value) {
+            // 缓存在内存不需要转换
+            if (!this.options.needParsed) {
+                return value;
+            }
+            return JSON.stringify(value, this.options.replacer);
+        };
+        Object.defineProperty(Cache2.prototype, "cacheValues", {
+            // 获取全部缓存数据，不处理过期数据和排序
+            get: function () {
+                return this._parse(this.options.storage.getItem(this.cacheKey)) || {};
+            },
+            enumerable: false,
+            configurable: true
+        });
+        // 设置缓存数据
+        Cache2.prototype.setCacheValues = function (values) {
+            this.options.storage.setItem(this.cacheKey, this._stringify(values));
+        };
+        // 从缓存中获取保存的值。如果未找到或已过期，则返回 undefined 。如果找到该值，则返回该值。
+        Cache2.prototype.get = function (key) {
+            var data = this.cacheValues[key];
+            if (data && this._check(key, data)) {
+                return data.v;
+            }
+            return undefined;
+        };
+        // 从缓存中获取多个保存的值。如果未找到或已过期，则返回一个空对象。如果找到该值，它会返回一个具有键值对的对象。
+        Cache2.prototype.mget = function (keys) {
+            var _this = this;
+            var ret = {};
+            if (!Array.isArray(keys)) {
+                return ret;
+            }
+            var cacheValues = this.cacheValues;
+            keys.forEach(function (key) {
+                var data = cacheValues[key];
+                if (data && _this._check(key, data)) {
+                    ret[key] = data.v;
+                }
+            });
+            return ret;
+        };
+        // 从缓存中获取全部保存的值。返回一个具有键值对的对象。
+        Cache2.prototype.getAll = function () {
+            var keys = Object.keys(this.cacheValues);
+            return this.mget(keys);
+        };
+        // 设置键值对。设置成功返回 true 。
+        Cache2.prototype.set = function (key, value, ttl) {
+            if (this.options.max === 0) {
+                return false;
+            }
+            var cacheValues = this.cacheValues;
+            var keys = Object.keys(cacheValues);
+            // 当前不存在该键值，并且数据量超过最大限制
+            if (!cacheValues[key] && this._isLimited(keys.length)) {
+                var validKeys = this.keys();
+                if (this._isLimited(validKeys.length)) {
+                    // 如果最大限制策略是替换，将优先替换快过期的数据，如果都是一样的过期时间(0)，按照先入先出规则处理。
+                    if (this.options.maxStrategy === 'replaced') {
+                        var replaceKey = this._getReplaceKey(validKeys, cacheValues);
+                        this.del(replaceKey);
+                    }
+                    else {
+                        // 如果是最大限制策略是不允许添加，返回 false 。
+                        return false;
+                    }
+                }
+            }
+            cacheValues[key] = this._wrap(value, ttl);
+            this.setCacheValues(cacheValues);
+            this.emit('set', key, cacheValues[key].v);
+            return true;
+        };
+        // 设置多个键值对。全部设置成功返回 true 。
+        Cache2.prototype.mset = function (keyValueSet) {
+            var _this = this;
+            // 该处不使用数组 some 方法，是因为不能某个失败，而导致其他就不在更新。
+            var ret = true;
+            keyValueSet.forEach(function (item) {
+                var itemSetResult = _this.set(item.key, item.value, item.ttl);
+                if (ret && !itemSetResult) {
+                    ret = false;
+                }
+            });
+            return ret;
+        };
+        // 删除一个或多个键。返回已删除条目的数量。删除永远不会失败。
+        Cache2.prototype.del = function (key) {
+            var _this = this;
+            var cacheValues = this.cacheValues;
+            var count = 0;
+            var keys = Array.isArray(key) ? key : [key];
+            keys.forEach(function (key) {
+                if (cacheValues[key]) {
+                    count++;
+                    var oldData = cacheValues[key];
+                    delete cacheValues[key];
+                    _this.emit('del', key, oldData.v);
+                }
+            });
+            if (count > 0) {
+                this.setCacheValues(cacheValues);
+            }
+            return count;
+        };
+        // 删除当前所有缓存。
+        Cache2.prototype.clear = function () {
+            this.options.storage.removeItem(this.cacheKey);
+        };
+        // 返回所有现有键的数组。
+        Cache2.prototype.keys = function () {
+            var _this = this;
+            var cacheValues = this.cacheValues;
+            var keys = Object.keys(cacheValues);
+            return keys.filter(function (key) { return _this._check(key, cacheValues[key]); });
+        };
+        // 当前缓存是否包含某个键。
+        Cache2.prototype.has = function (key) {
+            var data = this.cacheValues[key];
+            return !!(data && this._check(key, data));
+        };
+        // 获取缓存值并从缓存中删除键。
+        Cache2.prototype.take = function (key) {
+            var ret;
+            var data = this.cacheValues[key];
+            if (data && this._check(key, data)) {
+                ret = data.v;
+                this.del(key);
+            }
+            return ret;
+        };
+        // 重新定义一个键的 ttl 。如果找到并更新成功，则返回 true 。
+        Cache2.prototype.ttl = function (key, ttl) {
+            var cacheValues = this.cacheValues;
+            var data = cacheValues[key];
+            if (data && this._check(key, data)) {
+                cacheValues[key] = this._wrap(data.v, ttl);
+                return true;
+            }
+            return false;
+        };
+        // 获取某个键的 ttl 。
+        // 如果未找到键或已过期，返回 undefined 。
+        // 如果 ttl 为 0 ，返回 0 。
+        // 否则返回一个以毫秒为单位的时间戳，表示键值将过期的时间。
+        Cache2.prototype.getTtl = function (key) {
+            var cacheValues = this.cacheValues;
+            var data = cacheValues[key];
+            if (data && this._check(key, data)) {
+                return cacheValues[key].t;
+            }
+            return undefined;
+        };
+        // 启动定时校验过期数据
+        Cache2.prototype.startCheckperiod = function () {
+            var _this = this;
+            // 触发全部缓存数据是否过期校验
+            this.keys();
+            if (this.options.checkperiod > 0) {
+                clearTimeout(this._checkTimeout);
+                this._checkTimeout = setTimeout(function () {
+                    _this.startCheckperiod();
+                }, this.options.checkperiod);
+            }
+        };
+        // 停止定时校验过期数据
+        Cache2.prototype.stopCheckperiod = function () {
+            clearTimeout(this._checkTimeout);
+        };
+        return Cache2;
+    }(EmitterPro));
+
+    // 事件触发器缓存最长保留时间，轮询时间不能超过该时间一半
+    var MAX_EMITTER_TIME = 30 * 60 * 1000;
+    // 处理程序
+    var handlers = {
+        data: {},
+        // 添加处理程序
+        add: function (eventName, listener) {
+            if (!this.data[eventName]) {
+                this.data[eventName] = [];
+            }
+            this.data[eventName].push({
+                timestamp: Date.now(),
+                fn: listener
+            });
+        },
+        // 删除处理程序
+        remove: function (eventName, listener) {
+            if (this.data[eventName] && listener) {
+                this.data[eventName] = this.data[eventName].filter(function (item) { return item.fn !== listener; });
+            }
+            else {
+                this.data[eventName] = [];
+            }
+        },
+        // 获取处理程序
+        get: function (eventName) {
+            return this.data[eventName] || [];
+        },
+        // 是否还有处理程序
+        has: function (eventName) {
+            var eventList = this.get(eventName);
+            return eventList.length > 0;
+        }
+    };
+    // 触发器缓存
+    var emitterStorage = new Cache2('__private_cross_window_emitter__', {
+        stdTTL: MAX_EMITTER_TIME,
+        storage: window.localStorage
     });
-  };
+    // 运行
+    var run = function (eventName, cb) {
+        return function () {
+            var curEmitter = emitterStorage.get(eventName);
+            var curHandlers = handlers.get(eventName);
+            if (curEmitter) {
+                curHandlers.forEach(function (_a, index) {
+                    var timestamp = _a.timestamp, fn = _a.fn;
+                    if (timestamp < curEmitter.timestamp) {
+                        cb === null || cb === void 0 ? void 0 : cb();
+                        curHandlers[index].timestamp = Date.now(); // 更新执行时间
+                        fn.apply(null, curEmitter.params);
+                    }
+                });
+            }
+        };
+    };
+    // 轮询管理
+    var polling = {
+        data: {},
+        // 开始轮询
+        start: function (eventName, fn, pollingInterval) {
+            if (pollingInterval === void 0) { pollingInterval = 500; }
+            if (!eventName) {
+                return;
+            }
+            if (!this.data[eventName]) {
+                this.data[eventName] = {
+                    timestamp: Date.now(),
+                    pollingInterval: pollingInterval,
+                    timer: null
+                };
+            }
+            var curPolling = this.data[eventName];
+            curPolling.pollingInterval = pollingInterval;
+            clearInterval(curPolling.timer);
+            curPolling.timer = setInterval(fn, pollingInterval);
+        },
+        // 停止轮询
+        stop: function (eventName) {
+            if (!eventName || !this.data[eventName]) {
+                return;
+            }
+            clearInterval(this.data[eventName].timer);
+        },
+        // 设置轮询时间
+        setPollingInterval: function (eventName, pollingInterval) {
+            if (pollingInterval === void 0) { pollingInterval = 500; }
+            if (!eventName || !this.data[eventName] || !pollingInterval) {
+                return;
+            }
+            if (pollingInterval > MAX_EMITTER_TIME / 2) {
+                console.warn("polling interval no more than ".concat(MAX_EMITTER_TIME, "."));
+                pollingInterval = MAX_EMITTER_TIME / 2;
+            }
+            var curPolling = this.data[eventName];
+            clearInterval(curPolling.timer);
+            this.start(eventName, run(eventName), pollingInterval);
+        }
+    };
+    /**
+     * 注册事件
+     *
+     * @param {string} eventName 事件名称
+     * @param {function} listener 回调函数
+     */
+    var on = function (eventName, listener) {
+        handlers.add(eventName, listener);
+        polling.start(eventName, run(eventName));
+    };
+    /**
+     * 注册一次事件，执行后移除该监听方法
+     *
+     * @param {string} eventName 事件名称
+     * @param {function} listener 回调函数
+     */
+    var once = function (eventName, listener) {
+        var isRun = false; // 标识是否运行过函数
+        handlers.add(eventName, listener);
+        polling.start(eventName, function () {
+            if (isRun) {
+                handlers.remove(eventName, listener); // 移除该监听方法
+                if (!handlers.has(eventName)) {
+                    polling.stop(eventName); // 如果没有处理程序，停止轮询
+                }
+            }
+            run(eventName, function () {
+                isRun = true;
+            })();
+        });
+    };
+    /**
+     * 解绑事件，如不传第二参数，将移除全部 eventName 的事件
+     *
+     * @param {string} eventName 事件名称
+     * @param {function} [listener] 回调函数
+     */
+    var off = function (eventName, listener) {
+        handlers.remove(eventName, listener);
+        if (!handlers.has(eventName)) {
+            polling.stop(eventName);
+        }
+    };
+    /**
+     * 触发事件
+     *
+     * @param {string} eventName 事件名称
+     * @param {any[]} ...args 剩余参数用于传参
+     */
+    var emit = function (eventName) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        emitterStorage.set(eventName, {
+            timestamp: Date.now(),
+            params: args || []
+        });
+    };
+    // // 销毁，全部取消轮询
+    // const destroy = () => {
+    //   const eventNames = Object.keys(handlers.data);
+    //   eventNames.forEach(eventName => polling.stop(eventName));
+    //   handlers.remove();
+    // }
+    /**
+     * 设置轮询时间
+     *
+     * @param {string} eventName 事件名称
+     * @param {number} pollingInterval 轮询时间，单位毫秒
+     */
+    var setPollingInterval = function (eventName, pollingInterval) {
+        polling.setPollingInterval(eventName, pollingInterval);
+    };
 
-  /**
-   * 解绑事件，如不传第二参数，将移除全部 eventName 的事件
-   * 
-   * @param {string} eventName 事件名称
-   * @param {function} [listener] 回调函数
-   */
-  var off = _exports.off = function off(eventName, listener) {
-    handlers.remove(eventName, listener);
-    if (!handlers.has(eventName)) {
-      polling.stop(eventName);
-    }
-  };
+    exports.emit = emit;
+    exports.off = off;
+    exports.on = on;
+    exports.once = once;
+    exports.setPollingInterval = setPollingInterval;
 
-  /**
-   * 触发事件
-   * 
-   * @param {string} eventName 事件名称
-   * @param {any[]} ...args 剩余参数用于传参
-   */
-  var emit = _exports.emit = function emit(eventName) {
-    for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-      args[_key2 - 1] = arguments[_key2];
-    }
-    emitterStorage.add.apply(emitterStorage, [eventName].concat(args));
-  };
-
-  // // 销毁，全部取消轮询
-  // const destroy = () => {
-  //   const eventNames = Object.keys(handlers.get());
-  //   eventNames.forEach(eventName => polling.stop(eventName));
-  //   handlers.remove();
-  // }
-
-  /**
-   * 设置轮询时间
-   * 
-   * @param {string} eventName 事件名称
-   * @param {number} pollingInterval 轮询时间，单位毫秒
-   */
-  var setPollingInterval = _exports.setPollingInterval = function setPollingInterval(eventName, pollingInterval) {
-    polling.setPollingInterval(eventName, pollingInterval);
-  };
-  var _default = _exports["default"] = {
-    on: on,
-    once: once,
-    off: off,
-    emit: emit,
-    setPollingInterval: setPollingInterval
-  };
-});
-
-/***/ })
-
-/******/ });
-});
+}));
 //# sourceMappingURL=cross-window-emitter.js.map

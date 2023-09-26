@@ -1,12 +1,16 @@
+import Cache from 'cache2';
+
+type Listener = (...args: any[]) => any;
+
 // 事件触发器缓存最长保留时间，轮询时间不能超过该时间一半
 const MAX_EMITTER_TIME = 30 * 60 * 1000;
 
 // 处理程序
 const handlers = {
-  data: {},
+  data: {} as Record<string, { fn: Listener; timestamp: number; }[]>,
 
   // 添加处理程序
-  add(eventName, listener) {
+  add(eventName: string, listener: Listener) {
     if (!this.data[eventName]) {
       this.data[eventName] = [];
     }
@@ -17,7 +21,7 @@ const handlers = {
   },
 
   // 删除处理程序
-  remove(eventName, listener) {
+  remove(eventName: string, listener?: Listener) {
     if (this.data[eventName] && listener) {
       this.data[eventName] = this.data[eventName].filter(item => item.fn !== listener);
     } else {
@@ -26,68 +30,25 @@ const handlers = {
   },
 
   // 获取处理程序
-  get(eventName) {
-    return eventName ? this.data[eventName] : this.data;
+  get(eventName: string) {
+    return this.data[eventName] || [];
   },
 
   // 是否还有处理程序
-  has(eventName) {
-    const eventList = this.get(eventName) || [];
+  has(eventName: string) {
+    const eventList = this.get(eventName);
     return eventList.length > 0;
   }
 };
 
 // 触发器缓存
-const emitterStorage = {
-  // 缓存key
-  key: "__private_cross_window_emitter__",
-
-  // 获取缓存
-  get(eventName) {
-    const tmpData = JSON.parse(window.localStorage.getItem(this.key)) || {};
-    return eventName ? tmpData[eventName] : tmpData;
-  },
-
-  // 设置缓存
-  set(data) {
-    window.localStorage.setItem(this.key, JSON.stringify(data));
-  },
-
-  // 添加数据
-  add(eventName, ...args) {
-    const tmpData = this.get();
-
-    tmpData[eventName] = {
-      timestamp: Date.now(), // 触发时间
-      params: args || []
-    }
-
-    const keys = Object.keys(tmpData);
-
-    keys.forEach(key => {
-      if (Date.now() - tmpData[key] > MAX_EMITTER_TIME) {
-        delete tmpData[key]
-      }
-    });
-
-    this.set(tmpData);
-  },
-
-  // 删除数据
-  remove(eventName) {
-    const tmpData = this.get();
-
-    if (eventName) {
-      delete tmpData[eventName];
-      this.set(tmpData);
-    } else {
-      window.localStorage.removeItem(this.key);
-    }
-  }
-}
+const emitterStorage = new Cache<{ timestamp: number; params: any[]; }>('__private_cross_window_emitter__', {
+  stdTTL: MAX_EMITTER_TIME,
+  storage: window.localStorage
+});
 
 // 运行
-const run = (eventName, cb = () => { }) => {
+const run = (eventName: string, cb?: () => void) => {
   return () => {
     const curEmitter = emitterStorage.get(eventName);
     const curHandlers = handlers.get(eventName);
@@ -95,9 +56,9 @@ const run = (eventName, cb = () => { }) => {
     if (curEmitter) {
       curHandlers.forEach(({ timestamp, fn }, index) => {
         if (timestamp < curEmitter.timestamp) {
-          cb();
+          cb?.();
           curHandlers[index].timestamp = Date.now(); // 更新执行时间
-          fn.call(null, ...curEmitter.params);
+          fn.apply(null, curEmitter.params);
         }
       })
     }
@@ -106,10 +67,10 @@ const run = (eventName, cb = () => { }) => {
 
 // 轮询管理
 const polling = {
-  data: {},
+  data: {} as Record<string, { timestamp: number; pollingInterval: number; timer: any; }>,
 
   // 开始轮询
-  start(eventName, fn, pollingInterval = 500) {
+  start(eventName: string, fn: () => void, pollingInterval = 500) {
     if (!eventName) {
       return;
     }
@@ -129,7 +90,7 @@ const polling = {
   },
 
   // 停止轮询
-  stop(eventName) {
+  stop(eventName: string) {
     if (!eventName || !this.data[eventName]) {
       return;
     }
@@ -137,7 +98,7 @@ const polling = {
   },
 
   // 设置轮询时间
-  setPollingInterval(eventName, pollingInterval = 500) {
+  setPollingInterval(eventName: string, pollingInterval = 500) {
     if (!eventName || !this.data[eventName] || !pollingInterval) {
       return;
     }
@@ -160,7 +121,7 @@ const polling = {
  * @param {string} eventName 事件名称
  * @param {function} listener 回调函数
  */
-const on = (eventName, listener) => {
+const on = (eventName: string, listener: Listener) => {
   handlers.add(eventName, listener);
   polling.start(eventName, run(eventName));
 }
@@ -171,7 +132,7 @@ const on = (eventName, listener) => {
  * @param {string} eventName 事件名称
  * @param {function} listener 回调函数
  */
-const once = (eventName, listener) => {
+const once = (eventName: string, listener: Listener) => {
   let isRun = false; // 标识是否运行过函数
   handlers.add(eventName, listener);
   polling.start(eventName, () => {
@@ -195,7 +156,7 @@ const once = (eventName, listener) => {
  * @param {string} eventName 事件名称
  * @param {function} [listener] 回调函数
  */
-const off = (eventName, listener) => {
+const off = (eventName: string, listener?: Listener) => {
   handlers.remove(eventName, listener);
 
   if (!handlers.has(eventName)) {
@@ -209,13 +170,16 @@ const off = (eventName, listener) => {
  * @param {string} eventName 事件名称
  * @param {any[]} ...args 剩余参数用于传参
  */
-const emit = (eventName, ...args) => {
-  emitterStorage.add(eventName, ...args);
+const emit = (eventName: string, ...args: any[]) => {
+  emitterStorage.set(eventName, {
+    timestamp: Date.now(), // 触发时间
+    params: args || []
+  });
 }
 
 // // 销毁，全部取消轮询
 // const destroy = () => {
-//   const eventNames = Object.keys(handlers.get());
+//   const eventNames = Object.keys(handlers.data);
 //   eventNames.forEach(eventName => polling.stop(eventName));
 //   handlers.remove();
 // }
@@ -226,7 +190,7 @@ const emit = (eventName, ...args) => {
  * @param {string} eventName 事件名称
  * @param {number} pollingInterval 轮询时间，单位毫秒
  */
-const setPollingInterval = (eventName, pollingInterval) => {
+const setPollingInterval = (eventName: string, pollingInterval: number) => {
   polling.setPollingInterval(eventName, pollingInterval);
 }
 
@@ -237,11 +201,3 @@ export {
   emit,
   setPollingInterval
 }
-
-export default {
-  on,
-  once,
-  off,
-  emit,
-  setPollingInterval
-};
