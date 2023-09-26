@@ -1,6 +1,6 @@
 {
   "name": "cross-window-emitter",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Co-domain cross-window event triggers",
   "main": "dist/cross-window-emitter.cjs.js",
   "module": "dist/cross-window-emitter.esm.js",
