@@ -18,10 +18,9 @@
   },
   "keywords": [
     "cross",
-    "cross-webview",
-    "cross-iframe",
-    "cross-window",
-    "cross-window-emitter"
+    "webview",
+    "iframe",
+    "window"
   ],
   "author": "",
   "license": "MIT",

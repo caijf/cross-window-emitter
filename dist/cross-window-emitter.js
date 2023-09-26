@@ -116,23 +116,17 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   Object.defineProperty(_exports, "__esModule", {
     value: true
   });
-  _exports["default"] = _exports.setPollingInterval = _exports.emit = _exports.off = _exports.once = _exports.on = void 0;
-
+  _exports.setPollingInterval = _exports.once = _exports.on = _exports.off = _exports.emit = _exports["default"] = void 0;
   function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
   function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-  function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-  function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
-
+  function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+  function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
   function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-  function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
+  function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
   // 事件触发器缓存最长保留时间，轮询时间不能超过该时间一半
-  var MAX_EMITTER_TIME = 30 * 60 * 1000; // 处理程序
+  var MAX_EMITTER_TIME = 30 * 60 * 1000;
 
+  // 处理程序
   var handlers = {
     data: {},
     // 添加处理程序
@@ -140,7 +134,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       if (!this.data[eventName]) {
         this.data[eventName] = [];
       }
-
       this.data[eventName].push({
         timestamp: Date.now(),
         // 注册或触发时间，如果该时间大于触发时间则不触发。
@@ -149,11 +142,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     },
     // 删除处理程序
     remove: function remove(eventName, listener) {
-      if (!this.data[eventName]) {
-        this.data[eventName] = [];
-      }
-
-      if (listener) {
+      if (this.data[eventName] && listener) {
         this.data[eventName] = this.data[eventName].filter(function (item) {
           return item.fn !== listener;
         });
@@ -170,8 +159,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       var eventList = this.get(eventName) || [];
       return eventList.length > 0;
     }
-  }; // 触发器缓存
+  };
 
+  // 触发器缓存
   var emitterStorage = {
     // 缓存key
     key: "__private_cross_window_emitter__",
@@ -187,11 +177,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     // 添加数据
     add: function add(eventName) {
       var tmpData = this.get();
-
       for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         args[_key - 1] = arguments[_key];
       }
-
       tmpData[eventName] = {
         timestamp: Date.now(),
         // 触发时间
@@ -208,7 +196,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     // 删除数据
     remove: function remove(eventName) {
       var tmpData = this.get();
-
       if (eventName) {
         delete tmpData[eventName];
         this.set(tmpData);
@@ -216,41 +203,37 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         window.localStorage.removeItem(this.key);
       }
     }
-  }; // 运行
+  };
 
+  // 运行
   var run = function run(eventName) {
     var cb = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
     return function () {
       var curEmitter = emitterStorage.get(eventName);
       var curHandlers = handlers.get(eventName);
-
       if (curEmitter) {
         curHandlers.forEach(function (_ref, index) {
           var timestamp = _ref.timestamp,
-              fn = _ref.fn;
-
+            fn = _ref.fn;
           if (timestamp < curEmitter.timestamp) {
             cb();
             curHandlers[index].timestamp = Date.now(); // 更新执行时间
-
             fn.call.apply(fn, [null].concat(_toConsumableArray(curEmitter.params)));
           }
         });
       }
     };
-  }; // 轮询管理
+  };
 
-
+  // 轮询管理
   var polling = {
     data: {},
     // 开始轮询
     start: function start(eventName, fn) {
       var pollingInterval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 500;
-
       if (!eventName) {
         return;
       }
-
       if (!this.data[eventName]) {
         this.data[eventName] = {
           timestamp: Date.now(),
@@ -259,7 +242,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
           timer: null
         };
       }
-
       var curPolling = this.data[eventName];
       curPolling.pollingInterval = pollingInterval;
       clearInterval(curPolling.timer);
@@ -270,39 +252,43 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       if (!eventName || !this.data[eventName]) {
         return;
       }
-
       clearInterval(this.data[eventName].timer);
     },
     // 设置轮询时间
     setPollingInterval: function setPollingInterval(eventName) {
       var pollingInterval = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 500;
-
       if (!eventName || !this.data[eventName] || !pollingInterval) {
         return;
       }
-
       if (pollingInterval > MAX_EMITTER_TIME / 2) {
         console.warn("polling interval no more than ".concat(MAX_EMITTER_TIME, "."));
         pollingInterval = MAX_EMITTER_TIME / 2;
       }
-
       var curPolling = this.data[eventName];
       clearInterval(curPolling.timer);
       this.start(eventName, run(eventName), pollingInterval);
     }
-  }; // 注册事件
+  };
 
-  var on = function on(eventName, listener) {
+  /**
+   * 注册事件
+   * 
+   * @param {string} eventName 事件名称
+   * @param {function} listener 回调函数
+   */
+  var on = _exports.on = function on(eventName, listener) {
     handlers.add(eventName, listener);
     polling.start(eventName, run(eventName));
-  }; // 注册一次事件，执行后移除该监听方法
+  };
 
-
-  _exports.on = on;
-
-  var once = function once(eventName, listener) {
+  /**
+   * 注册一次事件，执行后移除该监听方法
+   * 
+   * @param {string} eventName 事件名称
+   * @param {function} listener 回调函数
+   */
+  var once = _exports.once = function once(eventName, listener) {
     var isRun = false; // 标识是否运行过函数
-
     handlers.add(eventName, listener);
     polling.start(eventName, function () {
       if (isRun) {
@@ -317,52 +303,57 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         isRun = true;
       })();
     });
-  }; // 解绑事件
+  };
 
-
-  _exports.once = once;
-
-  var off = function off(eventName, listener) {
+  /**
+   * 解绑事件，如不传第二参数，将移除全部 eventName 的事件
+   * 
+   * @param {string} eventName 事件名称
+   * @param {function} [listener] 回调函数
+   */
+  var off = _exports.off = function off(eventName, listener) {
     handlers.remove(eventName, listener);
-
     if (!handlers.has(eventName)) {
       polling.stop(eventName);
     }
-  }; // 触发事件
+  };
 
-
-  _exports.off = off;
-
-  var emit = function emit(eventName) {
+  /**
+   * 触发事件
+   * 
+   * @param {string} eventName 事件名称
+   * @param {any[]} ...args 剩余参数用于传参
+   */
+  var emit = _exports.emit = function emit(eventName) {
     for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
       args[_key2 - 1] = arguments[_key2];
     }
-
     emitterStorage.add.apply(emitterStorage, [eventName].concat(args));
-  }; // // 销毁，全部取消轮询
+  };
+
+  // // 销毁，全部取消轮询
   // const destroy = () => {
   //   const eventNames = Object.keys(handlers.get());
   //   eventNames.forEach(eventName => polling.stop(eventName));
   //   handlers.remove();
   // }
-  // 设置轮询间隔时间
 
-
-  _exports.emit = emit;
-
-  var setPollingInterval = function setPollingInterval(eventName, pollingInterval) {
+  /**
+   * 设置轮询时间
+   * 
+   * @param {string} eventName 事件名称
+   * @param {number} pollingInterval 轮询时间，单位毫秒
+   */
+  var setPollingInterval = _exports.setPollingInterval = function setPollingInterval(eventName, pollingInterval) {
     polling.setPollingInterval(eventName, pollingInterval);
   };
-
-  _exports.setPollingInterval = setPollingInterval;
-  var _default = {
+  var _default = _exports["default"] = {
     on: on,
     once: once,
     off: off,
     emit: emit,
     setPollingInterval: setPollingInterval
   };
-  _exports["default"] = _default;
 });
 
 /***/ })

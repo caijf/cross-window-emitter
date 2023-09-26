@@ -18,11 +18,7 @@ const handlers = {
 
   // 删除处理程序
   remove(eventName, listener) {
-    if (!this.data[eventName]) {
-      this.data[eventName] = [];
-    }
-
-    if (listener) {
+    if (this.data[eventName] && listener) {
       this.data[eventName] = this.data[eventName].filter(item => item.fn !== listener);
     } else {
       this.data[eventName] = [];
@@ -158,13 +154,23 @@ const polling = {
   }
 }
 
-// 注册事件
+/**
+ * 注册事件
+ * 
+ * @param {string} eventName 事件名称
+ * @param {function} listener 回调函数
+ */
 const on = (eventName, listener) => {
   handlers.add(eventName, listener);
   polling.start(eventName, run(eventName));
 }
 
-// 注册一次事件，执行后移除该监听方法
+/**
+ * 注册一次事件，执行后移除该监听方法
+ * 
+ * @param {string} eventName 事件名称
+ * @param {function} listener 回调函数
+ */
 const once = (eventName, listener) => {
   let isRun = false; // 标识是否运行过函数
   handlers.add(eventName, listener);
@@ -183,7 +189,12 @@ const once = (eventName, listener) => {
   });
 }
 
-// 解绑事件
+/**
+ * 解绑事件，如不传第二参数，将移除全部 eventName 的事件
+ * 
+ * @param {string} eventName 事件名称
+ * @param {function} [listener] 回调函数
+ */
 const off = (eventName, listener) => {
   handlers.remove(eventName, listener);
 
@@ -192,7 +203,12 @@ const off = (eventName, listener) => {
   }
 }
 
-// 触发事件
+/**
+ * 触发事件
+ * 
+ * @param {string} eventName 事件名称
+ * @param {any[]} ...args 剩余参数用于传参
+ */
 const emit = (eventName, ...args) => {
   emitterStorage.add(eventName, ...args);
 }
@@ -204,7 +220,12 @@ const emit = (eventName, ...args) => {
 //   handlers.remove();
 // }
 
-// 设置轮询间隔时间
+/**
+ * 设置轮询时间
+ * 
+ * @param {string} eventName 事件名称
+ * @param {number} pollingInterval 轮询时间，单位毫秒
+ */
 const setPollingInterval = (eventName, pollingInterval) => {
   polling.setPollingInterval(eventName, pollingInterval);
 }

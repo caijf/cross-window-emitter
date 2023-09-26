@@ -8,8 +8,6 @@
 
 ## 安装
 
-**`npm` 或 `yarn` 安装**
-
 ```shell
 npm install cross-window-emitter
 ```
@@ -18,12 +16,15 @@ npm install cross-window-emitter
 yarn add cross-window-emitter
 ```
 
+```shell
+pnpm add cross-window-emitter
+```
+
 **浏览器引入**
 
 在浏览器中使用 `script` 标签直接引入文件，并使用全局变量 `crossWindowEmitter` 。
 
 `npm` 包的 `cross-window-emitter/dist` 目录下提供了 `cross-window-emitter.js` 以及 `cross-window-emitter.min.js`。你也可以通过 [UNPKG](https://unpkg.com/cross-window-emitter@latest/dist/) 进行下载。
-
 
 ## 使用
 
@@ -32,7 +33,7 @@ yarn add cross-window-emitter
 ```javascript
 import crossWindowEmitter from 'cross-window-emitter';
 
-crossWindowEmitter.on("update", ()=>{
+crossWindowEmitter.on('update', () => {
   console.log('update');
 });
 ```
@@ -42,7 +43,7 @@ crossWindowEmitter.on("update", ()=>{
 ```javascript
 import crossWindowEmitter from 'cross-window-emitter';
 
-crossWindowEmitter.emit("update");
+crossWindowEmitter.emit('update');
 ```
 
 ## API
@@ -55,7 +56,7 @@ crossWindowEmitter.emit("update");
 添加 `listener` 函数到名为 `eventName` 的事件的监听器数组的末尾。 不会检查 `listener` 是否已被添加。 多次调用并传入相同的 `eventName` 与 `listener` 会导致 `listener` 会被添加多次。
 
 ```javascript
-crossWindowEmitter.on("update", ()=>{
+crossWindowEmitter.on('update', () => {
   console.log('update');
 });
 ```
@@ -70,12 +71,12 @@ crossWindowEmitter.on("update", ()=>{
 如果 `eventName` 事件为空，将自动停止轮询。
 
 ```javascript
-crossWindowEmitter.once("update", ()=>{
+crossWindowEmitter.once('update', () => {
   console.log('update');
 });
 ```
 
-### off(eventName, listener)
+### off(eventName[, listener])
 
 > - `eventName` &lt;string&gt; | &lt;symbol&gt; 事件名称。
 > - `listener` &lt;Function&gt; 回调函数。
@@ -85,12 +86,12 @@ crossWindowEmitter.once("update", ()=>{
 如果没有传入 `listener`，将移除全部 `eventName` 事件。
 
 ```javascript
-function callback(value){
+function callback(value) {
   // ...
 }
 crossWindowEmitter.on('update', callback);
 // ...
-crossWindowEmitter.off("update");
+crossWindowEmitter.off('update');
 ```
 
 ### emit(eventName[, ...args])
@@ -100,13 +101,11 @@ crossWindowEmitter.off("update");
 
 按照监听器注册的顺序，同步地调用每个注册到名为 `eventName` 的事件的监听器，并传入提供的参数。
 
-每次调用会检查是否有缓存超过30分钟的 `eventName`，超时将自动清除。
+每次调用会检查是否有缓存超过 30 分钟的 `eventName`，超时将自动清除。
 
 ### setPollingInterval(eventName, pollingInterval)
 
 > - eventName &lt;string&gt; | &lt;symbol&gt;
 > - pollingInterval &lt;number&gt;
 
-设置当前窗口名为 `eventName` 的事件轮询调用时间，`pollingInterval` 不能超过15分钟，否则自动修正为15分钟。
-
-
+设置当前窗口名为 `eventName` 的事件轮询调用时间，`pollingInterval` 不能超过 15 分钟，否则自动修正为 15 分钟。

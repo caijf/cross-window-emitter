@@ -34,7 +34,7 @@ declare namespace crossWindowEmitter {
   export const emit: (eventName: string, ...args?: any) => void;
 
   /**
-   * 设置轮询时间，默认500毫秒
+   * 设置轮询时间
    * 
    * @param {string} eventName 事件名称
    * @param {number} pollingInterval 轮询时间，单位毫秒
