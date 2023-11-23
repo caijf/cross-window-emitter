@@ -122,6 +122,53 @@
         return EmitterPro;
     }());
 
+    // 随机字符串
+    function randomString() {
+        return Math.random().toString(16).substring(2, 8);
+    }
+    // 内部自增id
+    var uid = 1;
+    // 返回唯一标识
+    function getUniqueId(id) {
+        return typeof id === 'string' && id ? id : "".concat(randomString(), "_").concat(uid++);
+    }
+    // 是否支持 storage
+    function isStorageSupported(storage) {
+        try {
+            var isSupport = typeof storage === 'object' &&
+                storage !== null &&
+                !!storage.setItem &&
+                !!storage.getItem &&
+                !!storage.removeItem;
+            if (isSupport) {
+                var key = getUniqueId();
+                var value = '1';
+                storage.setItem(key, value);
+                if (storage.getItem(key) !== value) {
+                    return false;
+                }
+                storage.removeItem(key);
+            }
+            return isSupport;
+        }
+        catch (e) {
+            console.error("[cache2] ".concat(storage, " is not supported. The default memory cache will be used."));
+            return false;
+        }
+    }
+    function parse(value, reviver) {
+        try {
+            return JSON.parse(value, reviver);
+        }
+        catch (e) {
+            return value;
+        }
+    }
+    function stringify(value, replacer) {
+        return JSON.stringify(value, replacer);
+    }
+    var inWindow = typeof window !== 'undefined' && typeof window === 'object' && window.window === window;
+
     var cache = {};
     var memoryStorage = {
         getItem: function (key) {
@@ -135,68 +182,81 @@
         }
     };
 
-    // 随机字符串
-    function randomString() {
-        return Math.random().toString(16).substring(2, 8);
-    }
-    // 内部自增id
-    var uid = 1;
-    // 返回唯一标识
-    function uniqueId(id) {
-        if (id === void 0) { id = ''; }
-        var str = typeof id === 'string' && id ? id : "".concat(randomString(), "_").concat(uid++);
-        return 'cache2_' + str;
-    }
-    // 是否支持 storage
-    function isStorageSupported(storage) {
-        try {
-            var isSupport = typeof storage === 'object' &&
-                storage !== null &&
-                !!storage.setItem &&
-                !!storage.getItem &&
-                !!storage.removeItem;
-            if (isSupport) {
-                var key = uniqueId();
-                var value = '1';
-                storage.setItem(key, value);
-                if (storage.getItem(key) !== value) {
-                    return false;
-                }
-                storage.removeItem(key);
+    var Storage = /** @class */ (function () {
+        function Storage(storage, options) {
+            this.isSupported = storage ? isStorageSupported(storage) : false;
+            this.keyPrefix = (options === null || options === void 0 ? void 0 : options.prefix) || (this.isSupported ? '' : getUniqueId());
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            this.storage = this.isSupported ? storage : memoryStorage;
+            this.isMemoryStorage = !this.isSupported || storage === memoryStorage;
+            this.options = __assign({ needParsed: !this.isMemoryStorage }, options);
+            this._keys = {};
+        }
+        Storage.prototype.getKey = function (key) {
+            return this.keyPrefix + key;
+        };
+        Storage.prototype.get = function (key) {
+            var k = this.getKey(key);
+            var data = this.storage.getItem(k);
+            return this.options.needParsed ? parse(data, this.options.reviver) : data;
+        };
+        Storage.prototype.set = function (key, data) {
+            var k = this.getKey(key);
+            this.storage.setItem(k, this.options.needParsed ? stringify(data, this.options.replacer) : data);
+            if (this.isMemoryStorage) {
+                // 内部标记
+                this._keys[key] = 1;
             }
-            return isSupport;
-        }
-        catch (e) {
-            console.error('[cache2] The current custom storage is not supported. The default memory cache will be used.');
-            return false;
-        }
-    }
-    var Cache2 = /** @class */ (function (_super) {
-        __extends(Cache2, _super);
-        function Cache2(key, options) {
+        };
+        Storage.prototype.del = function (key) {
+            var k = this.getKey(key);
+            this.storage.removeItem(k);
+            if (this.isMemoryStorage) {
+                delete this._keys[key];
+            }
+        };
+        Storage.prototype.clear = function () {
+            var _this = this;
+            if (typeof this.storage.clear === 'function') {
+                this.storage.clear();
+            }
+            else if (this.isMemoryStorage) {
+                var keys = Object.keys(this._keys);
+                keys.forEach(function (key) {
+                    _this.del(key);
+                });
+            }
+        };
+        return Storage;
+    }());
+
+    var defaultPrefix = 'cache2_';
+    var defaultNamespace = 'default';
+    var Cache = /** @class */ (function (_super) {
+        __extends(Cache, _super);
+        function Cache(namespace, options) {
             var _this = _super.call(this) || this;
             var k, opts;
-            if (typeof key === 'string') {
-                k = key;
+            if (typeof namespace === 'string') {
+                k = namespace;
             }
-            else if (typeof key === 'object') {
-                opts = key;
+            else if (typeof namespace === 'object') {
+                opts = namespace;
             }
             if (!opts && typeof options === 'object') {
                 opts = options;
             }
-            _this.options = __assign({ max: -1, stdTTL: 0, storage: memoryStorage, maxStrategy: 'limited', checkperiod: 0, needParsed: typeof (opts === null || opts === void 0 ? void 0 : opts.needParsed) === 'boolean' ? opts.needParsed : !!(opts === null || opts === void 0 ? void 0 : opts.storage) }, opts);
-            // iOS Safari 开启隐身模式下使用 localStorage 可能报错
-            if (_this.options.storage !== memoryStorage && !isStorageSupported(_this.options.storage)) {
-                _this.options.storage = memoryStorage;
-                _this.options.needParsed = false;
+            _this.options = __assign({ max: -1, stdTTL: 0, maxStrategy: 'limited', checkperiod: 0, prefix: defaultPrefix }, opts);
+            _this.storage = new Storage(_this.options.storage, _this.options);
+            if (!_this.storage.isMemoryStorage && !k) {
+                k = defaultNamespace;
             }
-            _this.cacheKey = uniqueId(k);
+            _this.cacheKey = getUniqueId(k);
             _this.startCheckperiod();
             return _this;
         }
         // 检查当前键值是否过期，如果过期将会自动删除
-        Cache2.prototype._check = function (key, data) {
+        Cache.prototype._check = function (key, data) {
             var ret = true;
             if (data.t !== 0 && data.t < Date.now()) {
                 ret = false;
@@ -205,7 +265,7 @@
             }
             return ret;
         };
-        Cache2.prototype._wrap = function (value, ttl) {
+        Cache.prototype._wrap = function (value, ttl) {
             var now = Date.now();
             var currentTtl = typeof ttl === 'number' ? ttl : this.options.stdTTL;
             var livetime = currentTtl > 0 ? now + currentTtl : 0;
@@ -215,10 +275,10 @@
                 n: now
             };
         };
-        Cache2.prototype._isLimited = function (len) {
+        Cache.prototype._isLimited = function (len) {
             return this.options.max > -1 && len >= this.options.max;
         };
-        Cache2.prototype._getReplaceKey = function (keys, cacheValues) {
+        Cache.prototype._getReplaceKey = function (keys, cacheValues) {
             var retkey = keys[0];
             keys.forEach(function (key) {
                 if (cacheValues[key].t < cacheValues[retkey].t ||
@@ -228,47 +288,28 @@
             });
             return retkey;
         };
-        Cache2.prototype._parse = function (value) {
-            // 缓存在内存不需要转换
-            if (!this.options.needParsed) {
-                return value;
-            }
-            try {
-                return JSON.parse(value, this.options.reviver);
-            }
-            catch (e) {
-                return value;
-            }
-        };
-        Cache2.prototype._stringify = function (value) {
-            // 缓存在内存不需要转换
-            if (!this.options.needParsed) {
-                return value;
-            }
-            return JSON.stringify(value, this.options.replacer);
-        };
-        Object.defineProperty(Cache2.prototype, "cacheValues", {
+        Object.defineProperty(Cache.prototype, "cacheValues", {
             // 获取全部缓存数据，不处理过期数据和排序
             get: function () {
-                return this._parse(this.options.storage.getItem(this.cacheKey)) || {};
+                return this.storage.get(this.cacheKey) || {};
             },
             enumerable: false,
             configurable: true
         });
         // 设置缓存数据
-        Cache2.prototype.setCacheValues = function (values) {
-            this.options.storage.setItem(this.cacheKey, this._stringify(values));
+        Cache.prototype.setCacheValues = function (values) {
+            this.storage.set(this.cacheKey, values);
         };
         // 从缓存中获取保存的值。如果未找到或已过期，则返回 undefined 。如果找到该值，则返回该值。
-        Cache2.prototype.get = function (key) {
+        Cache.prototype.get = function (key) {
             var data = this.cacheValues[key];
             if (data && this._check(key, data)) {
                 return data.v;
             }
-            return undefined;
+            return;
         };
         // 从缓存中获取多个保存的值。如果未找到或已过期，则返回一个空对象。如果找到该值，它会返回一个具有键值对的对象。
-        Cache2.prototype.mget = function (keys) {
+        Cache.prototype.mget = function (keys) {
             var _this = this;
             var ret = {};
             if (!Array.isArray(keys)) {
@@ -284,12 +325,12 @@
             return ret;
         };
         // 从缓存中获取全部保存的值。返回一个具有键值对的对象。
-        Cache2.prototype.getAll = function () {
+        Cache.prototype.getAll = function () {
             var keys = Object.keys(this.cacheValues);
             return this.mget(keys);
         };
         // 设置键值对。设置成功返回 true 。
-        Cache2.prototype.set = function (key, value, ttl) {
+        Cache.prototype.set = function (key, value, ttl) {
             if (this.options.max === 0) {
                 return false;
             }
@@ -316,7 +357,7 @@
             return true;
         };
         // 设置多个键值对。全部设置成功返回 true 。
-        Cache2.prototype.mset = function (keyValueSet) {
+        Cache.prototype.mset = function (keyValueSet) {
             var _this = this;
             // 该处不使用数组 some 方法，是因为不能某个失败，而导致其他就不在更新。
             var ret = true;
@@ -329,7 +370,7 @@
             return ret;
         };
         // 删除一个或多个键。返回已删除条目的数量。删除永远不会失败。
-        Cache2.prototype.del = function (key) {
+        Cache.prototype.del = function (key) {
             var _this = this;
             var cacheValues = this.cacheValues;
             var count = 0;
@@ -348,23 +389,23 @@
             return count;
         };
         // 删除当前所有缓存。
-        Cache2.prototype.clear = function () {
-            this.options.storage.removeItem(this.cacheKey);
+        Cache.prototype.clear = function () {
+            this.storage.del(this.cacheKey);
         };
         // 返回所有现有键的数组。
-        Cache2.prototype.keys = function () {
+        Cache.prototype.keys = function () {
             var _this = this;
             var cacheValues = this.cacheValues;
             var keys = Object.keys(cacheValues);
             return keys.filter(function (key) { return _this._check(key, cacheValues[key]); });
         };
         // 当前缓存是否包含某个键。
-        Cache2.prototype.has = function (key) {
+        Cache.prototype.has = function (key) {
             var data = this.cacheValues[key];
             return !!(data && this._check(key, data));
         };
         // 获取缓存值并从缓存中删除键。
-        Cache2.prototype.take = function (key) {
+        Cache.prototype.take = function (key) {
             var ret;
             var data = this.cacheValues[key];
             if (data && this._check(key, data)) {
@@ -374,7 +415,7 @@
             return ret;
         };
         // 重新定义一个键的 ttl 。如果找到并更新成功，则返回 true 。
-        Cache2.prototype.ttl = function (key, ttl) {
+        Cache.prototype.ttl = function (key, ttl) {
             var cacheValues = this.cacheValues;
             var data = cacheValues[key];
             if (data && this._check(key, data)) {
@@ -387,16 +428,27 @@
         // 如果未找到键或已过期，返回 undefined 。
         // 如果 ttl 为 0 ，返回 0 。
         // 否则返回一个以毫秒为单位的时间戳，表示键值将过期的时间。
-        Cache2.prototype.getTtl = function (key) {
+        Cache.prototype.getTtl = function (key) {
             var cacheValues = this.cacheValues;
             var data = cacheValues[key];
             if (data && this._check(key, data)) {
                 return cacheValues[key].t;
             }
-            return undefined;
+            return;
+        };
+        // 获取某个键值的最后修改时间
+        // 如果未找到键或已过期，返回 undefined 。
+        // 否则返回一个以毫秒为单位的时间戳，表示键值将过期的时间。
+        Cache.prototype.getLastModified = function (key) {
+            var cacheValues = this.cacheValues;
+            var data = cacheValues[key];
+            if (data && this._check(key, data)) {
+                return cacheValues[key].n;
+            }
+            return;
         };
         // 启动定时校验过期数据
-        Cache2.prototype.startCheckperiod = function () {
+        Cache.prototype.startCheckperiod = function () {
             var _this = this;
             // 触发全部缓存数据是否过期校验
             this.keys();
@@ -408,11 +460,15 @@
             }
         };
         // 停止定时校验过期数据
-        Cache2.prototype.stopCheckperiod = function () {
+        Cache.prototype.stopCheckperiod = function () {
             clearTimeout(this._checkTimeout);
         };
-        return Cache2;
+        return Cache;
     }(EmitterPro));
+
+    new Storage(inWindow ? window.localStorage : undefined);
+
+    new Storage(inWindow ? window.sessionStorage : undefined);
 
     // 事件触发器缓存最长保留时间，轮询时间不能超过该时间一半
     var MAX_EMITTER_TIME = 30 * 60 * 1000;
@@ -425,7 +481,7 @@
                 this.data[eventName] = [];
             }
             this.data[eventName].push({
-                timestamp: Date.now(),
+                timestamp: Date.now(), // 注册或触发时间，如果该时间大于触发时间则不触发。
                 fn: listener
             });
         },
@@ -449,7 +505,7 @@
         }
     };
     // 触发器缓存
-    var emitterStorage = new Cache2('__private_cross_window_emitter__', {
+    var emitterStorage = new Cache('__private_cross_window_emitter__', {
         stdTTL: MAX_EMITTER_TIME,
         storage: window.localStorage
     });
@@ -481,7 +537,7 @@
             }
             if (!this.data[eventName]) {
                 this.data[eventName] = {
-                    timestamp: Date.now(),
+                    timestamp: Date.now(), // 开始轮询时间
                     pollingInterval: pollingInterval,
                     timer: null
                 };
@@ -568,7 +624,7 @@
             args[_i - 1] = arguments[_i];
         }
         emitterStorage.set(eventName, {
-            timestamp: Date.now(),
+            timestamp: Date.now(), // 触发时间
             params: args || []
         });
     };

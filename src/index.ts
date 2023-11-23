@@ -1,4 +1,4 @@
-import Cache from 'cache2';
+import { Cache } from 'cache2';
 
 type Listener = (...args: any[]) => any;
 

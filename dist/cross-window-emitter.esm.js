@@ -1,4 +1,4 @@
-import Cache from 'cache2';
+import { Cache } from 'cache2';
 
 // 事件触发器缓存最长保留时间，轮询时间不能超过该时间一半
 var MAX_EMITTER_TIME = 30 * 60 * 1000;
@@ -11,7 +11,7 @@ var handlers = {
             this.data[eventName] = [];
         }
         this.data[eventName].push({
-            timestamp: Date.now(),
+            timestamp: Date.now(), // 注册或触发时间，如果该时间大于触发时间则不触发。
             fn: listener
         });
     },
@@ -67,7 +67,7 @@ var polling = {
         }
         if (!this.data[eventName]) {
             this.data[eventName] = {
-                timestamp: Date.now(),
+                timestamp: Date.now(), // 开始轮询时间
                 pollingInterval: pollingInterval,
                 timer: null
             };
@@ -154,7 +154,7 @@ var emit = function (eventName) {
         args[_i - 1] = arguments[_i];
     }
     emitterStorage.set(eventName, {
-        timestamp: Date.now(),
+        timestamp: Date.now(), // 触发时间
         params: args || []
     });
 };
