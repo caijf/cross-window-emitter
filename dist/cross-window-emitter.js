@@ -172,7 +172,7 @@
     var cache = {};
     var memoryStorage = {
         getItem: function (key) {
-            return cache[key] || null;
+            return key in cache ? cache[key] : null;
         },
         setItem: function (key, value) {
             cache[key] = value;
@@ -184,13 +184,15 @@
 
     var Storage = /** @class */ (function () {
         function Storage(storage, options) {
-            this.isSupported = storage ? isStorageSupported(storage) : false;
-            this.keyPrefix = (options === null || options === void 0 ? void 0 : options.prefix) || (this.isSupported ? '' : getUniqueId());
+            if (options === void 0) { options = {}; }
+            var isSupported = storage ? isStorageSupported(storage) : false;
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.storage = this.isSupported ? storage : memoryStorage;
-            this.isMemoryStorage = !this.isSupported || storage === memoryStorage;
+            this.storage = isSupported ? storage : memoryStorage;
+            this.isMemoryStorage = !isSupported || storage === memoryStorage;
             this.options = __assign({ needParsed: !this.isMemoryStorage }, options);
-            this._keys = {};
+            this.keyPrefix =
+                'prefix' in options ? String(options.prefix) : isSupported ? '' : getUniqueId();
+            this._keys = [];
         }
         Storage.prototype.getKey = function (key) {
             return this.keyPrefix + key;
@@ -205,14 +207,14 @@
             this.storage.setItem(k, this.options.needParsed ? stringify(data, this.options.replacer) : data);
             if (this.isMemoryStorage) {
                 // 内部标记
-                this._keys[key] = 1;
+                this._keys.push(key);
             }
         };
         Storage.prototype.del = function (key) {
             var k = this.getKey(key);
             this.storage.removeItem(k);
             if (this.isMemoryStorage) {
-                delete this._keys[key];
+                this._keys = this._keys.filter(function (item) { return item !== key; });
             }
         };
         Storage.prototype.clear = function () {
@@ -221,8 +223,7 @@
                 this.storage.clear();
             }
             else if (this.isMemoryStorage) {
-                var keys = Object.keys(this._keys);
-                keys.forEach(function (key) {
+                this._keys.forEach(function (key) {
                     _this.del(key);
                 });
             }
