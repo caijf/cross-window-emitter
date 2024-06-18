@@ -53,38 +53,82 @@
 
     var EmitterPro = /** @class */ (function () {
         function EmitterPro() {
-            this.handler = {};
+            this.handlers = {};
         }
         EmitterPro.prototype.eventNames = function () {
-            return Object.keys(this.handler);
+            var _a;
+            var symbols = ((_a = Object.getOwnPropertySymbols) === null || _a === void 0 ? void 0 : _a.call(Object, this.handlers)) || [];
+            var keys = Object.keys(this.handlers);
+            return keys.concat(symbols);
+        };
+        EmitterPro.prototype.rawListeners = function (eventName) {
+            var handler = this.handlers[eventName];
+            return handler ? handler.map(function (item) { return item.raw; }) : [];
         };
         EmitterPro.prototype.listeners = function (eventName) {
-            return this.handler[eventName] || [];
+            var handler = this.handlers[eventName];
+            return handler ? handler.map(function (item) { return item.wrap; }) : [];
         };
         EmitterPro.prototype.hasListener = function (eventName, listener) {
-            return this.listeners(eventName).some(function (item) { return item === listener; });
+            return this.rawListeners(eventName).some(function (item) { return item === listener; });
         };
-        EmitterPro.prototype.on = function (eventName, listener) {
-            if (!this.handler[eventName]) {
-                this.handler[eventName] = [listener];
+        EmitterPro.prototype._on = function (eventName, raw, wrap, context, dir) {
+            if (context === void 0) { context = null; }
+            if (dir === void 0) { dir = 1; }
+            var currentListener = { raw: raw, wrap: wrap, context: context };
+            if (!this.handlers[eventName]) {
+                this.handlers[eventName] = [currentListener];
             }
             else {
-                // 不允许添加相同的方法
-                if (!this.hasListener(eventName, listener)) {
-                    this.handler[eventName].push(listener);
+                var appendMethod = dir === 1 ? 'push' : 'unshift';
+                this.handlers[eventName][appendMethod](currentListener);
+            }
+            return this;
+        };
+        EmitterPro.prototype.prependListener = function (eventName, listener, context) {
+            return this._on(eventName, listener, listener, context, 0);
+        };
+        EmitterPro.prototype.on = function (eventName, listener, context) {
+            return this._on(eventName, listener, listener, context);
+        };
+        EmitterPro.prototype._wrapOnce = function (eventName, listener, context) {
+            var _this = this;
+            if (context === void 0) { context = null; }
+            var wrap = (function () {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                listener.apply(context, args);
+                _this.off(eventName, wrap);
+            });
+            return wrap;
+        };
+        EmitterPro.prototype.once = function (eventName, listener, context) {
+            var wrap = this._wrapOnce(eventName, listener, context);
+            return this._on(eventName, listener, wrap, context);
+        };
+        EmitterPro.prototype.prependOnceListener = function (eventName, listener, context) {
+            var wrap = this._wrapOnce(eventName, listener, context);
+            return this._on(eventName, listener, wrap, context, 0);
+        };
+        EmitterPro.prototype.off = function (eventName, listener) {
+            var handler = this.handlers[eventName];
+            if (handler) {
+                if (listener) {
+                    var index = handler.findIndex(function (item) { return item.wrap === listener || item.raw === listener; });
+                    if (index !== -1) {
+                        handler.splice(index, 1);
+                    }
+                }
+                else {
+                    delete this.handlers[eventName];
                 }
             }
             return this;
         };
-        EmitterPro.prototype.off = function (eventName, listener) {
-            if (this.handler[eventName]) {
-                if (typeof listener === 'function') {
-                    this.handler[eventName] = this.handler[eventName].filter(function (item) { return item !== listener; });
-                }
-                else {
-                    delete this.handler[eventName];
-                }
-            }
+        EmitterPro.prototype.offAll = function () {
+            this.handlers = {};
             return this;
         };
         EmitterPro.prototype.emit = function (eventName) {
@@ -92,32 +136,14 @@
             for (var _i = 1; _i < arguments.length; _i++) {
                 args[_i - 1] = arguments[_i];
             }
-            var listeners = this.listeners(eventName);
-            if (listeners.length > 0) {
-                listeners.forEach(function (listener) {
-                    // eslint-disable-next-line prefer-spread
-                    listener.apply(void 0, args);
+            var handler = this.handlers[eventName];
+            if (handler && handler.length > 0) {
+                handler.forEach(function (listener) {
+                    listener.wrap.apply(listener.context, args);
                 });
                 return true;
             }
             return false;
-        };
-        EmitterPro.prototype.once = function (eventName, listener) {
-            var _this = this;
-            var wrap = function () {
-                var args = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    args[_i] = arguments[_i];
-                }
-                // eslint-disable-next-line prefer-spread
-                listener.apply(void 0, args);
-                _this.off(eventName, wrap);
-            };
-            return this.on(eventName, wrap);
-        };
-        EmitterPro.prototype.offAll = function () {
-            this.handler = {};
-            return this;
         };
         return EmitterPro;
     }());
@@ -129,8 +155,8 @@
     // 内部自增id
     var uid = 1;
     // 返回唯一标识
-    function getUniqueId(id) {
-        return typeof id === 'string' && id ? id : "".concat(randomString(), "_").concat(uid++);
+    function getUniqueId() {
+        return "".concat(randomString(), "_").concat(uid++);
     }
     // 是否支持 storage
     function isStorageSupported(storage) {
@@ -167,79 +193,67 @@
     function stringify(value, replacer) {
         return JSON.stringify(value, replacer);
     }
-    var inWindow = typeof window !== 'undefined' && typeof window === 'object' && window.window === window;
 
     var cache = {};
-    var memoryStorage = {
-        getItem: function (key) {
-            return key in cache ? cache[key] : null;
-        },
-        setItem: function (key, value) {
-            cache[key] = value;
-        },
-        removeItem: function (key) {
-            delete cache[key];
+    var MemoryStorage = /** @class */ (function () {
+        function MemoryStorage(scope) {
+            if (scope === void 0) { scope = 'default'; }
+            this.scope = scope;
+            if (!cache[this.scope]) {
+                cache[this.scope] = {};
+            }
+            this.data = cache[this.scope];
         }
-    };
+        MemoryStorage.prototype.getItem = function (key) {
+            return key in this.data ? this.data[key] : null;
+        };
+        MemoryStorage.prototype.setItem = function (key, value) {
+            this.data[key] = value;
+        };
+        MemoryStorage.prototype.removeItem = function (key) {
+            delete this.data[key];
+        };
+        MemoryStorage.prototype.clear = function () {
+            cache[this.scope] = {};
+            this.data = cache[this.scope];
+        };
+        return MemoryStorage;
+    }());
 
     var Storage = /** @class */ (function () {
         function Storage(storage, options) {
             if (options === void 0) { options = {}; }
             var isSupported = storage ? isStorageSupported(storage) : false;
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.storage = isSupported ? storage : memoryStorage;
-            this.isMemoryStorage = !isSupported || storage === memoryStorage;
-            this.options = __assign({ needParsed: !this.isMemoryStorage }, options);
-            this.keyPrefix =
-                'prefix' in options ? String(options.prefix) : isSupported ? '' : getUniqueId();
-            this._keys = [];
+            this.options = __assign({ needParsed: isSupported }, options);
+            this.storage = isSupported ? storage : new MemoryStorage(this.options.memoryScope);
         }
-        Storage.prototype.getKey = function (key) {
-            return this.keyPrefix + key;
-        };
         Storage.prototype.get = function (key) {
-            var k = this.getKey(key);
-            var data = this.storage.getItem(k);
+            var data = this.storage.getItem(key);
             return this.options.needParsed ? parse(data, this.options.reviver) : data;
         };
         Storage.prototype.set = function (key, data) {
-            var k = this.getKey(key);
-            this.storage.setItem(k, this.options.needParsed ? stringify(data, this.options.replacer) : data);
-            if (this.isMemoryStorage) {
-                // 内部标记
-                this._keys.push(key);
-            }
+            this.storage.setItem(key, this.options.needParsed ? stringify(data, this.options.replacer) : data);
         };
         Storage.prototype.del = function (key) {
-            var k = this.getKey(key);
-            this.storage.removeItem(k);
-            if (this.isMemoryStorage) {
-                this._keys = this._keys.filter(function (item) { return item !== key; });
-            }
+            this.storage.removeItem(key);
         };
         Storage.prototype.clear = function () {
-            var _this = this;
             if (typeof this.storage.clear === 'function') {
                 this.storage.clear();
-            }
-            else if (this.isMemoryStorage) {
-                this._keys.forEach(function (key) {
-                    _this.del(key);
-                });
             }
         };
         return Storage;
     }());
 
-    var defaultPrefix = 'cache2_';
+    var defaultPrefix = 'cache2_'; // 命名空间缓存键前缀，默认 cache2_ 。
     var defaultNamespace = 'default';
     var Cache = /** @class */ (function (_super) {
         __extends(Cache, _super);
         function Cache(namespace, options) {
             var _this = _super.call(this) || this;
-            var k, opts;
+            var ns = defaultNamespace, opts;
             if (typeof namespace === 'string') {
-                k = namespace;
+                ns = namespace;
             }
             else if (typeof namespace === 'object') {
                 opts = namespace;
@@ -248,11 +262,8 @@
                 opts = options;
             }
             _this.options = __assign({ max: -1, stdTTL: 0, maxStrategy: 'limited', checkperiod: 0, prefix: defaultPrefix }, opts);
-            _this.storage = new Storage(_this.options.storage, _this.options);
-            if (!_this.storage.isMemoryStorage && !k) {
-                k = defaultNamespace;
-            }
-            _this.cacheKey = getUniqueId(k);
+            _this.storage = new Storage(_this.options.storage, __assign({ memoryScope: ns }, opts));
+            _this.cacheKey = (_this.options.prefix || '') + (ns || '') || getUniqueId();
             _this.startCheckperiod();
             return _this;
         }
@@ -466,10 +477,6 @@
         };
         return Cache;
     }(EmitterPro));
-
-    new Storage(inWindow ? window.localStorage : undefined);
-
-    new Storage(inWindow ? window.sessionStorage : undefined);
 
     // 事件触发器缓存最长保留时间，轮询时间不能超过该时间一半
     var MAX_EMITTER_TIME = 30 * 60 * 1000;
