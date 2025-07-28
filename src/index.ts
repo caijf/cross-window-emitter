@@ -61,6 +61,7 @@ const run = (eventName: string, cb?: () => void) => {
         if (timestamp < curEmitter.timestamp) {
           cb?.();
           curHandlers[index].timestamp = Date.now(); // 更新执行时间
+          // eslint-disable-next-line prefer-spread
           fn.apply(null, curEmitter.params);
         }
       });
